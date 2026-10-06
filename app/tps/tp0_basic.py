@@ -27,7 +27,6 @@ class ControladorTP0:
         self._construir_seccion_funciones(barra_lateral)
         self.app.escuchas_click_pixel.append(self._al_hacer_click_pixel)
 
-#1
     def _construir_seccion_menu(self, barra_lateral) -> None:
         barra_lateral.agregar_boton(
             SECCION_MENU, "Cargar imagen", self.cargar_imagen_original, primario=True
@@ -146,7 +145,6 @@ class ControladorTP0:
             self.app.mostrar_error("X e Y deben ser números enteros.")
             return
 
-        # Gris: un entero. Color: tres enteros B, G, R (como se muestran al hacer click)
         es_color = self.app.imagen_resultado.ndim == 3
         numeros = [int(n) for n in re.findall(r"-?\d+", self.entrada_valor.get())]
         if len(numeros) != (3 if es_color else 1):
@@ -167,7 +165,6 @@ class ControladorTP0:
             return
         self.app.establecer_resultado(actualizada)
 
-#2
     def _construir_seccion_funciones(self, barra_lateral) -> None:
         marco = barra_lateral.agregar_seccion(SECCION_FUNCIONES)
         barra_lateral.agregar_boton(SECCION_FUNCIONES, "Cargar imagen B", self.cargar_imagen_b)

@@ -39,7 +39,6 @@ def restar_imagenes(imagen_a: np.ndarray, imagen_b: np.ndarray) -> np.ndarray:
             f"({imagen_a.shape[:2]} vs {imagen_b.shape[:2]})."
         )
 
-    # Si una es color y la otra gris, la gris se pasa a 3 canales para poder restarlas
     if imagen_a.ndim != imagen_b.ndim:
         if imagen_a.ndim == 2:
             imagen_a = cv2.cvtColor(imagen_a, cv2.COLOR_GRAY2BGR)

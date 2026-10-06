@@ -10,7 +10,6 @@ SECCION_BORDES = "Bordes"
 SECCION_FILTROS = "Filtros"
 SECCION_UMBRAL = "Umbralización"
 
-# Valores por defecto de los formularios
 SIGMA_S = 3.0
 SIGMA_R = 50.0
 T_INICIAL = 127.0
@@ -43,7 +42,6 @@ class ControladorTP2(ControladorTP1):
         self._construir_seccion_filtros(barra_lateral)
         self._construir_seccion_umbral(barra_lateral)
 
-    # ===== Bordes: gradiente (Prewitt y Sobel) y Laplaciano =====
 
     def _construir_seccion_bordes(self, barra_lateral) -> None:
         barra_lateral.agregar_boton(SECCION_BORDES, "Prewitt", self.aplicar_prewitt)
@@ -64,7 +62,6 @@ class ControladorTP2(ControladorTP1):
             self.app.mostrar_error("Primero cargá una imagen.")
             return
 
-        # En color se aplica el detector a cada canal (B, G, R) y se vuelven a unir
         canales = [imagen] if imagen.ndim == 2 else cv2.split(imagen)
         bordes = []
         for canal in canales:
@@ -80,11 +77,6 @@ class ControladorTP2(ControladorTP1):
         self._aplicar_detector_gradiente(MASCARA_PREWITT, MASCARA_PREWITT.T)
 
     def detectar_cruces_por_cero(self, laplaciano, umbral_pendiente=0.0):
-        """Cruces por cero recorriendo filas y columnas.
-
-        Casos: (+,-), (-,+), (+,0,-) y (-,0,+). La pendiente del cruce es la
-        diferencia entre los valores extremos; se marca si es >= umbral.
-        """
         bordes = np.zeros(laplaciano.shape, dtype=bool)
 
         for eje in (0, 1):
@@ -165,7 +157,6 @@ class ControladorTP2(ControladorTP1):
         log = self.convolucionar(imagen, self.mascara_log(tamano, sigma))
         self.app.establecer_resultado(self.detectar_cruces_por_cero(log, umbral_pendiente=0))
 
-    # ===== Filtros: difusión isotrópica, anisotrópica y bilateral =====
 
     def _construir_seccion_filtros(self, barra_lateral) -> None:
         barra_lateral.agregar_boton(SECCION_FILTROS, "Difusión Isotrópica", self.aplicar_difusion_isotropica)
@@ -276,7 +267,6 @@ class ControladorTP2(ControladorTP1):
         self.app.establecer_resultado(resultado)
 
     def filtro_bilateral(self, imagen, sigma_s, sigma_r):
-        # Ventana de lado n = 2*sigma_s + 1 (como en la teoría)
         mitad = max(1, int(round(sigma_s)))
         base = imagen.astype(float)
         alto, ancho = base.shape
@@ -313,7 +303,6 @@ class ControladorTP2(ControladorTP1):
 
         self.app.establecer_resultado(self.filtro_bilateral(imagen, datos["sigma_s"], datos["sigma_r"]))
 
-    # ===== Umbralización: iterativa, Otsu y color por bandas =====
 
     def _construir_seccion_umbral(self, barra_lateral) -> None:
         barra_lateral.agregar_boton(SECCION_UMBRAL, "Umbral óptimo iterativo", self.aplicar_umbral_iterativo)
@@ -321,7 +310,6 @@ class ControladorTP2(ControladorTP1):
         barra_lateral.agregar_boton(SECCION_UMBRAL, "Segmentar color por bandas", self.segmentar_color_por_bandas)
 
     def umbral_iterativo(self, imagen, t_inicial, delta_t):
-        """Umbral óptimo iterativo. Devuelve (umbral, iteraciones)."""
         umbral = float(t_inicial)
         iteraciones = 0
 
@@ -330,7 +318,6 @@ class ControladorTP2(ControladorTP1):
             grupo_alto = imagen[imagen > umbral]
             grupo_bajo = imagen[imagen <= umbral]
             if grupo_alto.size == 0 or grupo_bajo.size == 0:
-                # Un grupo vacío: el T inicial no separa nada, se reinicia en el promedio
                 umbral = float(imagen.mean())
                 if iteraciones > 1000:
                     return umbral, iteraciones
@@ -342,7 +329,6 @@ class ControladorTP2(ControladorTP1):
             umbral = nuevo
 
     def umbral_otsu(self, imagen):
-        """Umbral de Otsu: maximiza la varianza entre clases. Devuelve el umbral t."""
         frecuencias = np.bincount(imagen.ravel(), minlength=256).astype(float)
         p = frecuencias / frecuencias.sum()
 
@@ -355,7 +341,6 @@ class ControladorTP2(ControladorTP1):
         valido = denominador > 0
         varianza_entre_clases[valido] = (m_global * p1[valido] - m[valido]) ** 2 / denominador[valido]
 
-        # Si hay varios t con el máximo (huecos del histograma) se toma el promedio
         maximos = np.flatnonzero(varianza_entre_clases == varianza_entre_clases.max())
         return int(round(maximos.mean()))
 
@@ -404,7 +389,6 @@ class ControladorTP2(ControladorTP1):
         self.app.mostrar_info(f"Umbral de Otsu: T = {umbral}.")
 
     def segmentar_color(self, imagen_color, metodo, t_inicial, delta_t):
-        """Umbraliza cada banda por separado y las recombina (hasta 8 colores)."""
         bandas = []
         umbrales = []
         for banda in cv2.split(imagen_color):
@@ -439,7 +423,6 @@ class ControladorTP2(ControladorTP1):
         self.app.establecer_resultado(segmentada)
         self.app.mostrar_info(f"Umbrales ({datos['metodo']}): R = {u_r:g}, G = {u_g:g}, B = {u_b:g}.")
 
-    # ===== Utilidades =====
 
     def _obtener_original_gris(self):
         if self.app.imagen_original is None:
@@ -454,12 +437,6 @@ class ControladorTP2(ControladorTP1):
         return self.app.imagen_original
 
     def _pedir_formulario(self, titulo, campos):
-        """Muestra un formulario con los valores por defecto ya cargados.
-
-        campos: lista de (clave, etiqueta, defecto). Si defecto es una lista o
-        tupla se muestra un menú de opciones; si no, un campo numérico.
-        Devuelve un dict {clave: valor} o None si se cancela.
-        """
         ventana = ctk.CTkToplevel(self.app)
         ventana.title(titulo)
         ventana.resizable(False, False)

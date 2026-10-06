@@ -98,12 +98,10 @@ class ControladorTP1:
         )
 
         self.app.establecer_resultado(imagen_transformada)
-#1
     def transformacion_gamma(self, imagen, gamma):
         c = 255 ** (1 - gamma)
         return (c * (imagen.astype(float) ** gamma)).astype(np.uint8)
 
-#2
     def aplicar_negativo(self):
         if self.app.imagen_original is None:
             self.app.mostrar_error("Primero cargá una imagen.")
@@ -118,7 +116,6 @@ class ControladorTP1:
     def negativo(self, imagen):
         return 255 - imagen
 
-#3
 
     def mostrar_histograma(self, imagen=None, titulo="Histograma de niveles de gris"):
         if imagen is None:
@@ -138,7 +135,6 @@ class ControladorTP1:
         eje = figura.add_subplot()
 
         if es_color:
-            # El color se guarda como B, G, R
             for canal, (nombre, color) in enumerate((("Azul", "tab:blue"), ("Verde", "tab:green"), ("Rojo", "tab:red"))):
                 eje.plot(range(256), self.histograma_grises(imagen[:, :, canal]), color=color, label=nombre)
             eje.legend()
@@ -193,7 +189,6 @@ class ControladorTP1:
             expand=True
         )
 
-#4
 
     def umbral_interactivo(self):
         if self.app.imagen_original is None:
@@ -218,11 +213,9 @@ class ControladorTP1:
 
         return imagen_binaria
 
-#5 #6
 
     def ecualizar_histograma(self, imagen):
         if imagen.ndim == 3:
-            # Imagen en color: se ecualiza cada canal por separado
             return np.stack([self.ecualizar_histograma(imagen[:, :, c]) for c in range(imagen.shape[2])], axis=2)
 
         histograma = self.histograma_grises(imagen)
@@ -283,7 +276,6 @@ class ControladorTP1:
             "imperceptible a simple vista."
         )
 
-#7
 
     def generar_numeros_gauss(self):
         mu = self._pedir_numero("Valor Medio", "Ingresá el valor medio mu:")
@@ -325,7 +317,6 @@ class ControladorTP1:
         numeros = np.random.exponential(scale=1 / lambdaa, size=cantidad)
         self.mostrar_histograma_numeros(numeros, "Distribución Exponencial")
 
-#8
 
     def _pedir_porcentaje(self):
         porcentaje = self._pedir_numero(
@@ -402,7 +393,6 @@ class ControladorTP1:
         self.mostrar_histograma_numeros(numeros, "Ruido Exponencial multiplicativo")
         self.app.establecer_resultado(resultado.astype(np.uint8))
 
-#9
 
     def aplicar_sal_pimienta(self):
         if self.app.imagen_original is None:
@@ -432,11 +422,9 @@ class ControladorTP1:
 
         self.app.establecer_resultado(resultado)
 
-#10
 
     def ventana_deslizante(self, imagen, tamano, funcion):
         if imagen.ndim == 3:
-            # Imagen en color: se filtra cada canal por separado
             return np.stack(
                 [self.ventana_deslizante(imagen[:, :, c], tamano, funcion) for c in range(imagen.shape[2])],
                 axis=2,

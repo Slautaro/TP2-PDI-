@@ -59,7 +59,6 @@ class VentanaPrincipal(ctk.CTk):
         self.panel_informacion.grid(row=1, column=1, sticky="ew", padx=8, pady=(0, 8))
 
     def _registrar_tps(self):
-        # Cada TP va en su propia pestaña; el menú (cargar/guardar imagen) queda siempre visible
         self.barra_lateral.grupo_actual = "TP0"
         self.tp0 = ControladorTP0(self)
         self.tp0.registrar(self.barra_lateral)

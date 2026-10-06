@@ -18,12 +18,9 @@ class BarraLateral(ctk.CTkScrollableFrame):
         self._selector = None
         self._grupo_visible = None
 
-        # Grupo al que se asignan las secciones que se vayan creando (ej.: "TP1").
-        # None = sección siempre visible.
         self.grupo_actual = None
 
     def agregar_seccion(self, titulo: str) -> ctk.CTkFrame:
-        # Se identifica por (pestaña, título): dos pestañas pueden tener secciones con el mismo nombre
         clave = (self.grupo_actual, titulo)
         if clave in self._secciones:
             return self._secciones[clave]
@@ -68,8 +65,6 @@ class BarraLateral(ctk.CTkScrollableFrame):
         if self._selector is not None:
             self._selector.pack_forget()
 
-        # Las secciones siempre visibles van arriba, luego el selector de TP y
-        # después las secciones del TP elegido.
         for grupo, etiqueta, marco in self._entradas:
             if grupo is None:
                 self._empaquetar_seccion(etiqueta, marco)
